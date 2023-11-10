@@ -1,2 +1,2 @@
-# fungi-project
-This is for Rob's comps
+# Fungi Project
+This is for Rob's comps ;)
