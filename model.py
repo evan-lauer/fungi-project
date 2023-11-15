@@ -3,6 +3,7 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import bisect
+import math
 
 
 fungi_names = pd.read_csv('./fungal_biogeography/fungi_data/Fungal_climate_data.csv', index_col=0).loc[:,['gen.name2']]
@@ -28,10 +29,11 @@ def get_hyphal_ext_rate_by_temperature(shortname, temperature):
   hyphal_ext_rate = row['hyphal_rate'][0]
   return float(hyphal_ext_rate)
 
+nyc_average_monthly_temp = [0.5, 2, 6, 12.5, 18, 22.5, 26, 25, 21, 15, 8.5, 4, 13.5]
 
 
-
-
+fungus_1_name = 'a.gal10.n'
+fungus_2_name = 'l.conif.n'
 #introduce organic matter input. for now, this will be modelled as a constant, but in the future it could be treated as a function of time
 dead_organic_matter = 1
 
@@ -54,12 +56,23 @@ fungus_1_hyphae_over_time = np.empty((0))
 fungus_2_hyphae_over_time = np.empty((0))
 
 #loop to simulate fungal competition at each time step. 
-for i in range (1, time): 
+for i in range (1, 365): 
+    month_num = math.floor(i/30) - 1
+    month_temp = nyc_average_monthly_temp[month_num]
+    fungus_1_variable_hyphal_rate = get_hyphal_ext_rate_by_temperature(fungus_1_name,month_temp)
+    fungus_2_variable_hyphal_rate = get_hyphal_ext_rate_by_temperature(fungus_2_name,month_temp)
     #change input matter
     dead_organic_matter += 1
-    #adjust realized fungal fitness based on growth rate and matter input
-    fungus_1_total_hyphae += (fungus_1_hyphal_extension_rate/total_hyphal_extension_demand) * dead_organic_matter
-    fungus_2_total_hyphae += (fungus_2_hyphal_extension_rate/total_hyphal_extension_demand) * dead_organic_matter
+
+    # adjust realized total hyphae based on fixed growth rate and matter input
+    # fungus_1_total_hyphae += (fungus_1_hyphal_extension_rate/total_hyphal_extension_demand) * dead_organic_matter
+    # fungus_2_total_hyphae += (fungus_2_hyphal_extension_rate/total_hyphal_extension_demand) * dead_organic_matter
+
+    # adjust total hyphae based on variable rate
+
+    fungus_1_total_hyphae += (fungus_1_variable_hyphal_rate/fungus_1_variable_hyphal_rate + fungus_2_variable_hyphal_rate) * dead_organic_matter
+    fungus_2_total_hyphae += (fungus_2_variable_hyphal_rate/fungus_1_variable_hyphal_rate + fungus_2_variable_hyphal_rate) * dead_organic_matter
+
 
     #identify system-wide realized fungal fitness
     system_total_hyphae = fungus_1_total_hyphae + fungus_2_total_hyphae
@@ -78,3 +91,5 @@ plt.ylabel('relative abundance')
 plt.title("Proportional Fungal Fitnesses")
 plt.legend()
 plt.show()
+print(fungus_1_hyphae_over_time)
+print(fungus_2_hyphae_over_time)
