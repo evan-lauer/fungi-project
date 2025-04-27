@@ -4,6 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import bisect
 import math
+import warnings
+# We have some annoying warnings that come up, so I'm suppressing them.
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action='ignore', category=DeprecationWarning)
 
 
 fungi_names = pd.read_csv('./fungal_biogeography/fungi_data/Fungal_climate_data.csv', index_col=0).loc[:,['gen.name2']]
